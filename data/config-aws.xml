@@ -226,8 +226,8 @@
     <nextuid>2000</nextuid>
     <nextgid>2000</nextgid>
     <timezone>Etc/UTC</timezone>
-    <time-update-interval>300</time-update-interval>
-    <timeservers>pool.ntp.org</timeservers>
+    <time-update-interval>3600</time-update-interval>
+    <timeservers>0.opnsense.pool.ntp.org 1.opnsense.pool.ntp.org 2.opnsense.pool.ntp.org 3.opnsense.pool.ntp.org</timeservers>
     <webgui>
       <protocol>https</protocol>
       <nohttpreferercheck>1</nohttpreferercheck>
@@ -256,40 +256,48 @@
       <enabled>enabled</enabled>
       <permitrootlogin>1</permitrootlogin>
     </ssh>
-
   </system>
 
   <interfaces>
+
     <public>
-      <enable>1</enable>
-      <if>vtnet0</if>
+      <if>xn0</if>
       <descr>public</descr>
+      <enable>1</enable>
       <lock>1</lock>
+      <spoofmac/>
       <blockpriv>1</blockpriv>
       <blockbogons>1</blockbogons>
-      <spoofmac/>
-      <ipaddr>public_ip4_addr</ipaddr>
-      <subnet>public_ip4_subnet</subnet>
+      <ipaddr>dhcp</ipaddr>
+      <subnet/>
       <gateway>public4gw</gateway>
-      <ipaddrv6>public_ip6_addr</ipaddrv6>
-      <subnetv6>public_ip6_subnet</subnetv6>
+      <ipaddrv6>dhcp6</ipaddrv6>
+      <subnetv6/>
       <gatewayv6>public6gw</gatewayv6>
+      <media/>
+      <mediaopt/>
     </public>
     <private>
-      <enable>1</enable>
-      <if>vtnet1</if>
+      <if>xn1</if>
       <descr>private</descr>
+      <enable>1</enable>
       <lock>1</lock>
       <spoofmac/>
-      <ipaddr>private_ip4_addr</ipaddr>
-      <subnet>private_ip4_subnet</subnet>
+      <ipaddr>dhcp</ipaddr>
+      <subnet/>
+      <gateway/>
+      <ipaddrv6>dhcp6</ipaddrv6>
+      <subnetv6/>
+      <gatewayv6/>
+      <media/>
+      <mediaopt/>
     </private>
   </interfaces>
 
   <gateways>
     <gateway_item>
       <interface>public</interface>
-      <gateway>public_ip4_gateway</gateway>
+      <gateway>dynamic</gateway>
       <name>public4gw</name>
       <weight>1</weight>
       <ipprotocol>inet</ipprotocol>
@@ -299,11 +307,10 @@
       <avg_loss_samples/>
       <avg_loss_delay_samples/>
       <defaultgw>1</defaultgw>
-      <disabled>1</disabled>
     </gateway_item>
     <gateway_item>
       <interface>public</interface>
-      <gateway>public_ip6_gateway</gateway>
+      <gateway>dynamic</gateway>
       <name>public6gw</name>
       <weight>1</weight>
       <ipprotocol>inet6</ipprotocol>
@@ -313,15 +320,11 @@
       <avg_loss_samples/>
       <avg_loss_delay_samples/>
       <defaultgw>1</defaultgw>
-      <disabled>1</disabled>
     </gateway_item>
   </gateways>
 
-  <dhcpd>
-  </dhcpd>
-
-  <unbound>
-  </unbound>
+  <dhcpd/>
+  <unbound/>
 
   <snmpd>
     <syslocation/>
