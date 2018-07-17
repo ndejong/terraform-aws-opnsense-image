@@ -1,7 +1,7 @@
 # terraform-aws-opnsense-cloud-image-builder
 # ============================================================================
 
-# Copyright (c) 2018 Nicholas de Jong <contact[at]nicholasdejong.com>
+# Copyright (c) 2018 Verb Networks Pty Ltd <contact [at] verbnetworks.com>
 #  - All rights reserved.
 #
 # Apache License v2.0
