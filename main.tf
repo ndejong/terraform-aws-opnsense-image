@@ -305,21 +305,15 @@ resource "null_resource" "instance-wait-poweroff" {
   depends_on = [ "null_resource.cleanup-shutdown-action" ]
 }
 
-# create a name for the instance - using a null_resource approach allows us to use a variable in the name here
+# establish local var values
 # ===
-resource "null_resource" "image-name" {
-  triggers = {
-    string = "OPNsense ${var.opnsense_release} - ${replace(replace(replace(replace(timestamp(), ":", ""),"-",""),"Z",""),"T","Z")}"
-  }
+locals {
+  build_id = "${random_string.build-id.result}"
+  image_name = "OPNsense ${var.opnsense_release} - ${replace(replace(replace(replace(timestamp(), ":", ""),"-",""),"Z",""),"T","Z")}"
+  image_action_outfile = "/tmp/opnsense-${local.build_id}-image-action.json"
+  image_action_idfile = "/tmp/opnsense-${local.build_id}-image-action.id"
 }
 
-# create a filename for the action output - using a null_resource approach allows us to use a variable in the name here
-# ===
-resource "null_resource" "output-filename" {
-  triggers = {
-    string = "/tmp/opnsense-${random_string.build-id.result}-image-action.json"
-  }
-}
 # take a image of this instance via the AWS API so that it occurs outside Terraform and will not later be destroyed
 # ===
 resource "null_resource" "instance-snapshot-action" {
@@ -328,14 +322,38 @@ resource "null_resource" "instance-snapshot-action" {
   provisioner "local-exec" {
     command = <<EOF
       sleep 5
-      aws --region=${var.aws_region} ec2 create-image --instance-id ${aws_instance.build-instance.id} --no-reboot \
-        --name "${null_resource.image-name.triggers.string}" \
-          > ${null_resource.output-filename.triggers.string}
+      export AWS_ACCESS_KEY_ID=${var.aws_access_key_id}
+      export AWS_SECRET_ACCESS_KEY=${var.aws_secret_access_key}
+      aws --region=${var.aws_region} ec2 create-image \
+          --instance-id ${aws_instance.build-instance.id} \
+          --no-reboot \
+          --name "${local.image_name}" \
+            > ${local.image_action_outfile}
+      echo -n $(jq -r ".ImageId" ${local.image_action_outfile}) > ${local.image_action_idfile}
     EOF
   }
 
   depends_on = [ "null_resource.instance-wait-poweroff" ]
 }
+
+# Tag the AMI with a name
+# ===
+resource "null_resource" "instance-snapshot-tag" {
+  count = "${var.do_opnsense_install * var.do_cleanup_shutdown * var.do_image}"
+
+  provisioner "local-exec" {
+    command = <<EOF
+      export AWS_ACCESS_KEY_ID=${var.aws_access_key_id}
+      export AWS_SECRET_ACCESS_KEY=${var.aws_secret_access_key}
+      aws --region=${var.aws_region} ec2 create-tags \
+          --resources ${file(local.image_action_idfile)} \
+          --tags Key=Name,Value="${local.image_name}"
+    EOF
+  }
+
+  depends_on = [ "null_resource.instance-snapshot-action" ]
+}
+
 
 # force some Terraform log output so it is a little easier to immediately observe the final status
 # ===
@@ -344,13 +362,11 @@ resource "null_resource" "action-status" {
 
   provisioner "local-exec" {
     command = <<EOF
-      echo $(jq -r ".action.status" "${null_resource.output-filename.triggers.string}") > "${null_resource.output-filename.triggers.string}.id"
       echo ""
       echo "!!!! "
       echo "!!!! build_id: ${random_string.build-id.result}"
-      echo "!!!! image_id: ${file(null_resource.output-filename.triggers.string)}"
-      echo "!!!! image_name: ${null_resource.image-name.triggers.string}"
-      echo "!!!! image_action_outfile: ${null_resource.output-filename.triggers.string}"
+      echo "!!!! image_name: ${local.image_name}"
+      echo "!!!! image_action_outfile: ${local.image_action_outfile}"
       echo "!!!! "
       echo "!!!! Remember to terraform destroy resources once image action is complete"
       echo "!!!! "
