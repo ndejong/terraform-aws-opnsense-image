@@ -28,8 +28,8 @@ instance will be **publicly** accessible to begin with unless you take other mea
 TCP22 (SSH) and TCP443 (HTTPS).
 
 ```hcl
-variable "aws_access_key_id" {}       # NB: set via env value, TF_VAR_aws_access_key_id
-variable "aws_secret_access_key" {}   # NB: set via env value, TF_VAR_aws_secret_access_key
+variable "aws_access_key_id" {}       # set via environment value `TF_VAR_aws_access_key_id`
+variable "aws_secret_access_key" {}   # set via environment value `TF_VAR_aws_secret_access_key`
 
 module "opnsense-image" {
   source  = "verbnetworks/opnsense-image/aws"

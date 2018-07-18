@@ -8,6 +8,7 @@
 #  - http://www.apache.org/licenses/LICENSE-2.0
 
 # establish the AWS provider
+# ===
 provider "aws" {
   access_key = "${var.aws_access_key_id}"
   secret_key = "${var.aws_secret_access_key}"
