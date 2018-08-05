@@ -34,8 +34,8 @@ variable "aws_secret_access_key" {}   # set via environment value `TF_VAR_aws_se
 module "opnsense-image" {
   source  = "verbnetworks/opnsense-image/aws"
 
-  opnsense_release = "18.1"
-  root_passwd = "opnsense!!"
+  opnsense_release = "18.7"
+  root_passwd = "honeyPot..."
 
   aws_region = "ap-southeast-1"
   aws_access_key_id = "${var.aws_access_key_id}"
@@ -71,6 +71,9 @@ The user should perform a `terraform destroy` once complete to remove the resour
 the action to create the image is performed as a `local-exec` call via `awscli` thus preventing it from being a 
 Terraform resource.
 
+## Use your new AMI
+You are now able to start a new AWS EC2 instance using the AMI that has been created for you.  Your new AMI will be
+listed under the "My AMIs" section when you choose an Amazon Machine Image to start within the AWS console UI.
 
 ## Warning!
 The default rules used in this arrangement differ from the default OPNsense rules in that they **allow** access to the 
@@ -100,10 +103,8 @@ process in Terraform.
 
 
 ## Builds Confirmed
- * (v0.3.0) amazon-ami: **ami-36a0dedc** > **OPNsense 18.1.12** (@ 2018-07-17T09:09:00Z)
-
-NB: as at 2018-07-17 OPNSense 18.7 has not yet been confirmed to correctly build, this will be resolved once OPNSense
-officially announce this build.
+ * (v0.3.0) amazon-ami: **FreeBSD 11.2-STABLE-amd64-2018-07-09 (ami-36a0dedc)** > **OPNsense 18.1.12** (@ 2018-07-17T09:09:00Z)
+ * (v0.3.1) amazon-ami: **FreeBSD 11.2-STABLE-amd64-2018-08-02 (ami-285012c2)** > **OPNsense 18.7.0** (@ 2018-08-05T15:12:13Z)
 
 
 ## Compute Providers Supported
